@@ -34,16 +34,17 @@ public class IF0001Test {
 
     @Test
     public void UT0001() throws Exception {
-        // DB,ファイルの準備
+        // setup input files and DB.
         etlTester.setupDatastore("SourceFiles",
                 "src/test/resources/example/IF0001/UT0001/setup_SourceFiles.xlsx");
 
         etlTester.setupDatastore("DB_H2_001",
                 "src/test/resources/example/IF0001/UT0001/setup_DB_H2_001.xlsx");
 
-        // ETL処理の実行
+        // execute ETL.
+        // TODO: write some code for execute ETL.
 
-        // DB, ファイルの検査
+        // assert output files and DB.
         etlTester.assertDatastore("TargetFiles",
                 "src/test/resources/example/IF0001/UT0001/expected_TargetFiles.xlsx");
 
