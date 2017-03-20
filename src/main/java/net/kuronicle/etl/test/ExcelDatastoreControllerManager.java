@@ -10,9 +10,10 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class ExcelDatastoreControllerManager implements
                                              DatastoreControllerManager {
 
@@ -30,9 +31,6 @@ public class ExcelDatastoreControllerManager implements
      * Excelシートを読み込む最大行数。
      */
     private static final int ROW_NUM_LIMIT = 10_000;
-
-    private static final Logger log = LoggerFactory.getLogger(
-            ExcelDatastoreControllerManager.class);
 
     /**
      * 列数：データストア名
@@ -53,6 +51,11 @@ public class ExcelDatastoreControllerManager implements
      * データストアタイプ：Database
      */
     private static final String DATASTORE_TYPE_DATABCE = "Database";
+
+    /**
+     * データストアタイプ：LocalFile from Excle file.
+     */
+    private static final String DATASTORE_TYPE_LOCAL_FILE_FORM_EXCEL = "LocalFileFromExcel";
 
     /**
      * 列数：JDBCドライバクラス名
@@ -154,6 +157,9 @@ public class ExcelDatastoreControllerManager implements
                     contorller = createFlatFileDatastoreController(name, type,
                             row);
                     break;
+                case DATASTORE_TYPE_LOCAL_FILE_FORM_EXCEL:
+                    contorller = createLocalFileFromExcelController(name, type, row);
+                    break;
                 default:
                     throw new IllegalStateException(String.format(
                             "Not supported datastore type. name=%s, type=%",
@@ -206,6 +212,15 @@ public class ExcelDatastoreControllerManager implements
             String type, Row row) {
 
         String dirPath = row.getCell(COL_NUM_DIR_PATH).getStringCellValue();
+
+        LocalFileController controller = new LocalFileController(name, type, dirPath);
+        return controller;
+    }
+
+    private DatastoreController createLocalFileFromExcelController(String name,
+            String type, Row row) {
+
+        String dirPath = row.getCell(COL_NUM_DIR_PATH).getStringCellValue();
         String charset = row.getCell(COL_NUM_CHARSET).getStringCellValue();
         String columnDelimiter = row.getCell(COL_NUM_COL_DELIMITER)
                 .getStringCellValue();
@@ -217,7 +232,7 @@ public class ExcelDatastoreControllerManager implements
         boolean hasHeader = row.getCell(COL_NUM_HAS_HEADER)
                 .getBooleanCellValue();
 
-        LocalFileController controller = new LocalFileController(name, type, dirPath, charset, columnDelimiter, columnQuote, lineDelimiter, hasHeader);
+        LocalFileFromExcelController controller = new LocalFileFromExcelController(name, type, dirPath, charset, columnDelimiter, columnQuote, lineDelimiter, hasHeader);
         return controller;
     }
 

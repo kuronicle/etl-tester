@@ -8,19 +8,49 @@ public class ExcelEtlTester implements EtlTester {
         datastoreControllerManager = new ExcelDatastoreControllerManager(datastoreInfoExcelFileName);
     }
 
-    public void setupDatastore(String datastoreName, String dataFile) {
+    @Override
+    public void setupDatastore(String datastoreName, String setupDataFile) {
 
         DatastoreController datastoreController = datastoreControllerManager
                 .getDatastoreController(datastoreName);
 
-        datastoreController.setupData(dataFile);
+        datastoreController.setupDatastore(setupDataFile);
     }
 
-    public void assertDatastore(String datastoreName, String dataFile) {
+    @Override
+    public void assertDatastore(String datastoreName, String expectedDataFile) {
 
         DatastoreController datastoreController = datastoreControllerManager
                 .getDatastoreController(datastoreName);
 
-        datastoreController.assertData(dataFile);
+        datastoreController.assertDatastore(expectedDataFile);
+    }
+
+    @Override
+    public void assertAndSaveDatastore(String datastoreName,
+            String expectedDataFile, String saveDataFile) {
+        DatastoreController datastoreController = datastoreControllerManager
+                .getDatastoreController(datastoreName);
+
+        datastoreController.assertAndSaveDatastore(expectedDataFile,
+                saveDataFile);
+    }
+
+    @Override
+    public void assertDatastore(String datastoreName, String expectedDataFile,
+            String targetDataName) {
+        DatastoreController datastoreController = datastoreControllerManager
+                .getDatastoreController(datastoreName);
+
+        datastoreController.assertDatastore(expectedDataFile, targetDataName);
+    }
+
+    @Override
+    public void assertDatastore(String datastoreName, String expectedDataFile,
+            String targetDataName, String[] sortColumns) {
+        DatastoreController datastoreController = datastoreControllerManager
+                .getDatastoreController(datastoreName);
+
+        datastoreController.assertDatastore(expectedDataFile, targetDataName, sortColumns);
     }
 }

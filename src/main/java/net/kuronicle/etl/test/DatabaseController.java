@@ -1,23 +1,32 @@
 package net.kuronicle.etl.test;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.dbunit.DatabaseUnitException;
 import org.dbunit.IDatabaseTester;
 import org.dbunit.JdbcDatabaseTester;
 import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.IDataSet;
+import org.dbunit.dataset.ITable;
+import org.dbunit.dataset.SortedTable;
 import org.dbunit.dataset.excel.XlsDataSet;
 import org.dbunit.operation.DatabaseOperation;
 
 import lombok.NonNull;
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 import net.kuronicle.etl.test.dbunit.Assertion;
 
 @ToString
+@Slf4j
 public class DatabaseController implements DatastoreController {
 
     @NonNull
@@ -39,7 +48,9 @@ public class DatabaseController implements DatastoreController {
 
     private IDatabaseTester databaseTester = null;
 
-    private boolean saveActualDataSet = true;
+    private IDatabaseConnection connection = null;
+
+    private Map<String, IDataSet> expectedDataSetMap = new HashMap<>();
 
     public DatabaseController(String datastoreName, String jdbcDriverClassName,
             String jdbcConnectionUrl, String dbUserName, String dbPassword,
@@ -59,23 +70,12 @@ public class DatabaseController implements DatastoreController {
     }
 
     @Override
-    public void setupData(String dataFilePath) {
-
-        IDataSet xlsDataSet = null;
-        try {
-            xlsDataSet = new XlsDataSet(new File(dataFilePath));
-        } catch (DataSetException e) {
-            throw new RuntimeException("Failed to read datastore. datastoreName="
-                    + datastoreName, e);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to read datastore file."
-                    + datastoreName, e);
-        }
-
-        setupData(xlsDataSet);
+    public void setupDatastore(String dataFilePath) {
+        IDataSet xlsDataSet = createXlsDataSetFrom(dataFilePath);
+        setupDatastore(xlsDataSet);
     }
 
-    private void setupData(IDataSet dataSet) {
+    private void setupDatastore(IDataSet dataSet) {
         if (databaseTester == null) {
             databaseTester = setupDatabaseTester();
         }
@@ -99,12 +99,28 @@ public class DatabaseController implements DatastoreController {
         }
     }
 
-    @Override
-    public void assertData(String dataFilePath) {
+    private IDatabaseConnection setupConnection() {
+        if (databaseTester == null) {
+            databaseTester = setupDatabaseTester();
+        }
 
-        IDataSet xlsDataSet = null;
         try {
-            xlsDataSet = new XlsDataSet(new File(dataFilePath));
+            return databaseTester.getConnection();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to get connection. datastoreName="
+                    + datastoreName, e);
+        }
+    }
+
+    @Override
+    public void assertDatastore(String dataFilePath) {
+        IDataSet xlsDataSet = createXlsDataSetFrom(dataFilePath);
+        assertDatastore(xlsDataSet);
+    }
+
+    private XlsDataSet createXlsDataSetFrom(String dataFilePath) {
+        try {
+            return new XlsDataSet(new File(dataFilePath));
         } catch (DataSetException e) {
             throw new RuntimeException("Failed to read datastore. datastoreName="
                     + datastoreName, e);
@@ -112,21 +128,11 @@ public class DatabaseController implements DatastoreController {
             throw new RuntimeException("Failed to read datastore file."
                     + datastoreName, e);
         }
-
-        assertData(xlsDataSet);
     }
 
-    private void assertData(IDataSet expectedDataSet) {
-        if (databaseTester == null) {
-            databaseTester = setupDatabaseTester();
-        }
-
-        IDatabaseConnection connection = null;
-        try {
-            connection = databaseTester.getConnection();
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to get connection. datastoreName="
-                    + datastoreName, e);
+    private IDataSet assertDatastore(IDataSet expectedDataSet) {
+        if (connection == null) {
+            connection = setupConnection();
         }
 
         IDataSet actualDataSet = null;
@@ -140,21 +146,96 @@ public class DatabaseController implements DatastoreController {
             throw new RuntimeException("", e);
         }
 
-        if (saveActualDataSet) {
-            saveActualDataSet(actualDataSet);
-        }
-
         try {
             Assertion.assertEquals(expectedDataSet, actualDataSet);
         } catch (DatabaseUnitException e) {
             throw new RuntimeException("Failed to assert dataset. datastoreName="
                     + datastoreName, e);
         }
+
+        return actualDataSet;
     }
 
-    private void saveActualDataSet(IDataSet actualDataSet) {
-        // TODO 自動生成されたメソッド・スタブ
+    @Override
+    public void assertAndSaveDatastore(String expectedDataFile,
+            String saveDataFile) {
+        IDataSet xlsDataSet = createXlsDataSetFrom(expectedDataFile);
+        IDataSet actualDataset = null;
+        try {
+            actualDataset = assertDatastore(xlsDataSet);
+        } finally {
+            if (actualDataset != null) {
+                saveDatastore(actualDataset, saveDataFile);
+            }
+        }
+    }
 
+    private void saveDatastore(IDataSet actualDataset, String saveDataFile) {
+        // create dir if dir does not exist.
+        String saveDir = FilenameUtils.getFullPath(saveDataFile);
+        try {
+            FileUtils.forceMkdir(new File(saveDir));
+            log.info(String.format("Create dir. dir=", saveDir));
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to create a dir for saving actual dataset. dir="
+                    + saveDir, e);
+        }
+
+        try {
+            saveDataFile = saveDataFile.replace(".xlsx", ".xls"); // DbUnit writes ".xls" file.
+            XlsDataSet.write(actualDataset,
+                    new FileOutputStream(new File(saveDataFile)));
+            log.info(String.format("Save actual dataset. file=%s",
+                    saveDataFile));
+        } catch (DataSetException e) {
+            throw new RuntimeException("Failed to write actual dataset for evicence. filePath="
+                    + saveDataFile, e);
+        } catch (IOException e) {
+            throw new RuntimeException("", e);
+        }
+    }
+
+    @Override
+    public void assertDatastore(String expectedDataFile,
+            String targetDataName) {
+        assertDatastore(expectedDataFile, targetDataName, null);
+    }
+
+    @Override
+    public void assertDatastore(String expectedDataFile, String targetDataName,
+            String[] sortColumns) {
+
+        IDataSet expectedDataSet = expectedDataSetMap.get(expectedDataFile);
+        if (expectedDataSet == null) {
+            expectedDataSet = createXlsDataSetFrom(expectedDataFile);
+            expectedDataSetMap.put(expectedDataFile, expectedDataSet);
+        }
+
+        if (connection == null) {
+            connection = setupConnection();
+        }
+
+        try {
+            ITable expectedTable = expectedDataSet.getTable(targetDataName);
+            ITable actualTable = connection.createTable(targetDataName);
+
+            if (sortColumns != null) {
+                expectedTable = new SortedTable(expectedTable, sortColumns);
+                actualTable = new SortedTable(actualTable, sortColumns);
+            }
+
+            Assertion.assertEquals(expectedTable, actualTable);
+
+        } catch (DataSetException e) {
+            // TODO 自動生成された catch ブロック
+            e.printStackTrace();
+        } catch (SQLException e) {
+            // TODO 自動生成された catch ブロック
+            e.printStackTrace();
+        } catch (DatabaseUnitException e) {
+            // TODO 自動生成された catch ブロック
+            e.printStackTrace();
+        }
     }
 
 }

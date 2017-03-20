@@ -1,10 +1,15 @@
 package net.kuronicle.etl.test;
 
-
 public interface DatastoreController {
 
-    void setupData(String dataFile);
+    void setupDatastore(String setupDataFile);
 
-    void assertData(String dataFile);
+    void assertDatastore(String expectedDataFile);
 
+    void assertDatastore(String expectedDataFile, String targetDataName);
+
+    void assertDatastore(String expectedDataFile, String targetDataName,
+            String[] sortColumns);
+
+    void assertAndSaveDatastore(String expectedDataFile, String saveDataFile);
 }
