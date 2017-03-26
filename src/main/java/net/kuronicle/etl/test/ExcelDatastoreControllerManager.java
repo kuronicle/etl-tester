@@ -112,7 +112,6 @@ public class ExcelDatastoreControllerManager implements
      */
     private static final int COL_NUM_HAS_HEADER = 12;
 
-
     private Map<String, DatastoreController> datastoreControllerMap = new HashMap<>();
 
     public ExcelDatastoreControllerManager(String datastoreInfoExcelFilePath) {
@@ -158,7 +157,8 @@ public class ExcelDatastoreControllerManager implements
                             row);
                     break;
                 case DATASTORE_TYPE_LOCAL_FILE_FORM_EXCEL:
-                    contorller = createLocalFileFromExcelController(name, type, row);
+                    contorller = createLocalFileFromExcelController(name, type,
+                            row);
                     break;
                 default:
                     throw new IllegalStateException(String.format(
@@ -212,8 +212,9 @@ public class ExcelDatastoreControllerManager implements
             String type, Row row) {
 
         String dirPath = row.getCell(COL_NUM_DIR_PATH).getStringCellValue();
+        String charset = row.getCell(COL_NUM_CHARSET).getStringCellValue();
 
-        LocalFileController controller = new LocalFileController(name, type, dirPath);
+        LocalFileController controller = new LocalFileController(name, type, dirPath, charset);
         return controller;
     }
 

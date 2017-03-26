@@ -83,6 +83,8 @@ public class LocalFileFromExcelController implements DatastoreController {
 
     @Override
     public void setupDatastore(String setupDataFile) {
+        log.info("***** Start setup. dataStore={}, inputExcelFile={}", name,
+                setupDataFile);
 
         try {
             XlsDataSet dataSet = new XlsDataSet(new File(setupDataFile));
@@ -114,7 +116,7 @@ public class LocalFileFromExcelController implements DatastoreController {
         String filePath = FilenameUtils.concat(dirPath, fileName);
         File file = new File(filePath);
         if (file.exists()) {
-            log.debug("Delete file. file=" + filePath);
+            log.info("Delete file. file={}", filePath);
             file.delete();
         }
     }
@@ -144,6 +146,7 @@ public class LocalFileFromExcelController implements DatastoreController {
 
         log.debug("Start to write file. path=" + filePath);
 
+        log.info("Create file. file={}", filePath);
         try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(
                 filePath), Charset.forName(charset))) {
 
@@ -329,6 +332,10 @@ public class LocalFileFromExcelController implements DatastoreController {
     public void assertDatastore(String expectedDataFile, String targetDataName,
             String[] sortColumns) {
 
+        log.info(
+                "***** Start assertion. dataStore={}, inputExcelFile={}, fileName={}",
+                name, expectedDataFile, targetDataName);
+
         IDataSet expectedDataSet = expectedDataSetMap.get(expectedDataFile);
         if (expectedDataSet == null) {
             expectedDataSet = createXlsDataSetFrom(expectedDataFile);
@@ -394,7 +401,7 @@ public class LocalFileFromExcelController implements DatastoreController {
 
             // CSV設定
             CsvParserSettings settings = new CsvParserSettings();
-            if("\\t".equals(columnDelimiter)) {
+            if ("\\t".equals(columnDelimiter)) {
                 settings.getFormat().setDelimiter('\t');
             } else {
                 settings.getFormat().setDelimiter(columnDelimiter.charAt(0));
@@ -442,9 +449,16 @@ public class LocalFileFromExcelController implements DatastoreController {
 
     private String getActualFilePath(String targetFileDir,
             String targetFileName) {
+
+        // 期待ファイル名に「%n%」が含まれていない場合は、
+        // 単純にディレクトリパスとファイル名を結合して返却。
         if (!targetFileName.matches(MULTI_FILE_NAME_REGEX)) {
             return FilenameUtils.concat(targetFileDir, targetFileName);
         }
+
+        // 期待ファイル名に「%n%」が含まている場合は、
+        // 実ファイルをディレクトリ内でファイル名の昇順でソートし、
+        // 対応する期待ファイル名を変更する。
 
         File targetDir = new File(targetFileDir);
         if (!targetDir.isDirectory()) {
@@ -452,7 +466,7 @@ public class LocalFileFromExcelController implements DatastoreController {
                     + targetFileDir);
         }
 
-        // targetDir からファイル名にマッチするファイル名の一覧を取得する。ファイル名順に並び替える。
+        // targetDir からファイル名にマッチするファイル名の一覧を取得する。ファイル名昇順に並び替える。
         String[] fileNames = targetDir.list(new FilenameFilter() {
             public boolean accept(File dir, String name) {
                 return name.matches(targetFileName.replaceAll("%[0-9]*%",
@@ -468,11 +482,11 @@ public class LocalFileFromExcelController implements DatastoreController {
         // 「%n%」の番号に合わせてファイル名を実際のファイル名に変更する。
         if (fileNames.length < fileNum) {
             throw new EtlTesterException(String.format(
-                    "exceed fine number. fileName=%s, fileNumber=%d",
+                    "Exceed fine number. fileName=%s, fileNumber=%d",
                     targetFileName, fileNames.length));
         }
         String fileName = fileNames[fileNum - 1];
-        log.info("convert file name. from={}, to={}", targetFileName, fileName);
+        log.info("Convert file name. from={}, to={}", targetFileName, fileName);
 
         return FilenameUtils.concat(targetFileDir, fileName);
     }

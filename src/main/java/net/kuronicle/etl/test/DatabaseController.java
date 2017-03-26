@@ -71,6 +71,8 @@ public class DatabaseController implements DatastoreController {
 
     @Override
     public void setupDatastore(String dataFilePath) {
+        log.info("***** Start setup. dataStore={}, inputExcelFile={}",
+                datastoreName, dataFilePath);
         IDataSet xlsDataSet = createXlsDataSetFrom(dataFilePath);
         setupDatastore(xlsDataSet);
     }
@@ -204,6 +206,10 @@ public class DatabaseController implements DatastoreController {
     @Override
     public void assertDatastore(String expectedDataFile, String targetDataName,
             String[] sortColumns) {
+
+        log.info(
+                "***** Start assertion. dataStore={}, inputExcelFile={}, fileName={}",
+                datastoreName, expectedDataFile, targetDataName);
 
         IDataSet expectedDataSet = expectedDataSetMap.get(expectedDataFile);
         if (expectedDataSet == null) {

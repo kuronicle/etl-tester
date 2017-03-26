@@ -47,21 +47,21 @@ public class IF0001Test {
         String testEvidenceDir = TEST_EVIDENCE_ROOT_DIR + testCaseName + "/";
 
         // setup input files and DB.
-        etlTester.setupDatastore("DB_H2_001",
-                testDataDir + "setup_DB_H2_001.xlsx");
+        etlTester.setupDatastore("DB_H2_001", testDataDir
+                + "setup_DB_H2_001.xlsx");
 
         // execute ETL.
         // TODO: write some code for execute ETL.
 
         // assert output files and DB.
-        etlTester.assertAndSaveDatastore("DB_H2_001",
-                testDataDir + "expected_DB_H2_001.xlsx",
-                testEvidenceDir + "actual_DB_H2_001.xlsx");
+        etlTester.assertAndSaveDatastore("DB_H2_001", testDataDir
+                + "expected_DB_H2_001.xlsx", testEvidenceDir
+                        + "actual_DB_H2_001.xlsx");
 
     }
 
     /**
-     * Test for CSV File.
+     * Test for CSV , UTF-8 File.
      * @throws Exception
      */
     @Test
@@ -70,20 +70,20 @@ public class IF0001Test {
         String testDataDir = TEST_DATA_ROOT_DIR + testCaseName + "/";
 
         // setup input files and DB.
-        etlTester.setupDatastore("SourceFiles_CSV_UTF-8",
-                testDataDir + "setup_SourceFiles.xlsx");
+        etlTester.setupDatastore("SourceFiles_CSV_UTF-8", testDataDir
+                + "setup_SourceFiles.xlsx");
 
         // execute ETL.
         // TODO: write some code for execute ETL.
 
         // assert output files and DB.
-        etlTester.assertDatastore("TargetFiles_CSV_UTF-8",
-                testDataDir + "expected_TargetFiles.xlsx");
+        etlTester.assertDatastore("TargetFiles_CSV_UTF-8", testDataDir
+                + "expected_TargetFiles.xlsx");
 
     }
 
     /**
-     * Test for TSV File.
+     * Test for TSV, Shift-JIS File.
      * @throws Exception
      */
     @Test
@@ -92,20 +92,20 @@ public class IF0001Test {
         String testDataDir = TEST_DATA_ROOT_DIR + testCaseName + "/";
 
         // setup input files and DB.
-        etlTester.setupDatastore("SourceFiles_TSV_MS932",
-                testDataDir + "setup_SourceFiles.xlsx");
+        etlTester.setupDatastore("SourceFiles_TSV_MS932", testDataDir
+                + "setup_SourceFiles.xlsx");
 
         // execute ETL.
         // TODO: write some code for execute ETL.
 
         // assert output files and DB.
-        etlTester.assertDatastore("TargetFiles_TSV_MS932",
-                testDataDir + "expected_TargetFiles.xlsx");
+        etlTester.assertDatastore("TargetFiles_TSV_MS932", testDataDir
+                + "expected_TargetFiles.xlsx");
 
     }
 
     /**
-     * Test for Database.
+     * Test for Database with data sort for assartion.
      * @throws Exception
      */
     @Test
@@ -114,21 +114,20 @@ public class IF0001Test {
         String testDataDir = TEST_DATA_ROOT_DIR + testCaseName + "/";
 
         // setup input files and DB.
-        etlTester.setupDatastore("DB_H2_001",
-                testDataDir + "setup_DB_H2_001.xlsx");
+        etlTester.setupDatastore("DB_H2_001", testDataDir
+                + "setup_DB_H2_001.xlsx");
 
         // execute ETL.
         // TODO: write some code for execute ETL.
 
         // assert output files and DB.
-        etlTester.assertDatastore("DB_H2_001",
-                testDataDir + "expected_DB_H2_001.xlsx",
-                "EMPLOYEE", new String[] { "ID" });
+        etlTester.assertDatastore("DB_H2_001", testDataDir
+                + "expected_DB_H2_001.xlsx", "EMPLOYEE", new String[] { "ID" });
 
     }
 
     /**
-     * \
+     * Test for CSV, UTF-8 file with dat sort for assertion.
      * @throws Exception
      */
     @Test
@@ -137,19 +136,17 @@ public class IF0001Test {
         String testDataDir = TEST_DATA_ROOT_DIR + testCaseName + "/";
 
         // setup input files and DB.
-        etlTester.setupDatastore("SourceFiles_CSV_UTF-8",
-                testDataDir + "setup_SourceFiles.xlsx");
+        etlTester.setupDatastore("SourceFiles_CSV_UTF-8", testDataDir
+                + "setup_SourceFiles.xlsx");
 
         // execute ETL.
         // TODO: write some code for execute ETL.
 
         // assert output files and DB.
-        etlTester.assertDatastore("TargetFiles_CSV_UTF-8",
-                testDataDir + "expected_TargetFiles.xlsx",
-                "item_UT0005_%1%.txt");
-        etlTester.assertDatastore("TargetFiles_CSV_UTF-8",
-                testDataDir + "expected_TargetFiles.xlsx",
-                "item_UT0005_%2%.txt");
+        etlTester.assertDatastore("TargetFiles_CSV_UTF-8", testDataDir
+                + "expected_TargetFiles.xlsx", "item_UT0005_%1%.txt");
+        etlTester.assertDatastore("TargetFiles_CSV_UTF-8", testDataDir
+                + "expected_TargetFiles.xlsx", "item_UT0005_%2%.txt");
 
     }
 
@@ -162,20 +159,55 @@ public class IF0001Test {
         String testDataDir = TEST_DATA_ROOT_DIR + testCaseName + "/";
 
         // setup input files and DB.
-        etlTester.setupDatastore("SourceFiles_TSV_MS932",
-                testDataDir + "setup_SourceFiles.xlsx");
+        etlTester.setupDatastore("SourceFiles_TSV_MS932", testDataDir
+                + "setup_SourceFiles.xlsx");
 
         // execute ETL.
         // TODO: write some code for execute ETL.
 
         // assert output files and DB.
-        etlTester.assertDatastore("TargetFiles_TSV_MS932",
-                testDataDir + "expected_TargetFiles.xlsx",
-                "item_UT0006_%1%.txt", new String[] { "ID" });
-        etlTester.assertDatastore("TargetFiles_TSV_MS932",
-                testDataDir + "expected_TargetFiles.xlsx",
-                "item_UT0006_%2%.txt", new String[] { "ID" });
+        etlTester.assertDatastore("TargetFiles_TSV_MS932", testDataDir
+                + "expected_TargetFiles.xlsx", "item_UT0006_%1%.txt",
+                new String[] { "ID" });
+        etlTester.assertDatastore("TargetFiles_TSV_MS932", testDataDir
+                + "expected_TargetFiles.xlsx", "item_UT0006_%2%.txt",
+                new String[] { "ID" });
 
+    }
+
+    @Test
+    public void UT0007() throws Exception {
+        String testCaseName = "UT0007";
+        String testDataDir = TEST_DATA_ROOT_DIR + testCaseName + "/";
+
+        // setup input files and DB.
+        etlTester.setupDatastore("SourceFiles_MS932", testDataDir + "setup");
+
+        // execute ETL.
+        // TODO: write some code for execute ETL.
+
+        etlTester.assertDatastore("TargetFiles_MS932", testDataDir + "expected",
+                "item_UT0007.txt");
+        etlTester.assertDatastore("TargetFiles_MS932", testDataDir + "expected",
+                "shop_UT0007.txt");
+
+    }
+
+    @Test
+    public void UT0008() throws Exception {
+        String testCaseName = "UT0008";
+        String testDataDir = TEST_DATA_ROOT_DIR + testCaseName + "/";
+
+        // setup input files and DB.
+        etlTester.setupDatastore("SourceFiles_UTF-8", testDataDir + "setup");
+
+        // execute ETL.
+        // TODO: write some code for execute ETL.
+
+        etlTester.assertDatastore("TargetFiles_UTF-8", testDataDir + "expected",
+                "item_UT0008_%1%.txt", new String[] {});
+        etlTester.assertDatastore("TargetFiles_UTF-8", testDataDir + "expected",
+                "item_UT0008_%2%.txt", new String[] {});
     }
 
 }
