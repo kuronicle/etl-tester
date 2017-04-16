@@ -12,4 +12,6 @@ public interface DatastoreController {
             String[] sortColumns);
 
     void assertAndSaveDatastore(String expectedDataFile, String saveDataFile);
+
+    void backupDatastore(String targetDataFile, String backupDataFile);
 }

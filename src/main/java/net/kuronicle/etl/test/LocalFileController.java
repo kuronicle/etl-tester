@@ -213,4 +213,10 @@ public class LocalFileController implements DatastoreController {
         return sb.toString();
     }
 
+    @Override
+    public void backupDatastore(String targetDataFile, String backupDataFile) {
+        // TODO Auto-generated method stub
+        
+    }
+
 }

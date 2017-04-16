@@ -52,9 +52,7 @@ public class DatabaseController implements DatastoreController {
 
     private Map<String, IDataSet> expectedDataSetMap = new HashMap<>();
 
-    public DatabaseController(String datastoreName, String jdbcDriverClassName,
-            String jdbcConnectionUrl, String dbUserName, String dbPassword,
-            String dbSchema) {
+    public DatabaseController(String datastoreName, String jdbcDriverClassName, String jdbcConnectionUrl, String dbUserName, String dbPassword, String dbSchema) {
         this.datastoreName = datastoreName;
         this.jdbcDriverClassName = jdbcDriverClassName;
         this.jdbcConnectionUrl = jdbcConnectionUrl;
@@ -63,16 +61,13 @@ public class DatabaseController implements DatastoreController {
         this.dbSchema = dbSchema;
     }
 
-    public DatabaseController(String datastoreName, String jdbcDriverClassName,
-            String jdbcConnectionUrl, String dbUserName, String dbPassword) {
-        this(datastoreName, jdbcDriverClassName, jdbcConnectionUrl, dbUserName,
-                dbPassword, null);
+    public DatabaseController(String datastoreName, String jdbcDriverClassName, String jdbcConnectionUrl, String dbUserName, String dbPassword) {
+        this(datastoreName, jdbcDriverClassName, jdbcConnectionUrl, dbUserName, dbPassword, null);
     }
 
     @Override
     public void setupDatastore(String dataFilePath) {
-        log.info("***** Start setup. dataStore={}, inputExcelFile={}",
-                datastoreName, dataFilePath);
+        log.info("***** Start setup. dataStore={}, inputExcelFile={}", datastoreName, dataFilePath);
         IDataSet xlsDataSet = createXlsDataSetFrom(dataFilePath);
         setupDatastore(xlsDataSet);
     }
@@ -87,8 +82,7 @@ public class DatabaseController implements DatastoreController {
         try {
             databaseTester.onSetup();
         } catch (Exception e) {
-            throw new RuntimeException("Failed to set up database. datastoreName="
-                    + datastoreName, e);
+            throw new RuntimeException("Failed to set up database. datastoreName=" + datastoreName, e);
         }
     }
 
@@ -96,8 +90,7 @@ public class DatabaseController implements DatastoreController {
         try {
             return new JdbcDatabaseTester(jdbcDriverClassName, jdbcConnectionUrl, dbUserName, dbPassword, dbSchema);
         } catch (ClassNotFoundException e) {
-            throw new RuntimeException("Cannot found JDBC driver. driverClassName="
-                    + jdbcDriverClassName, e);
+            throw new RuntimeException("Cannot found JDBC driver. driverClassName=" + jdbcDriverClassName, e);
         }
     }
 
@@ -109,8 +102,7 @@ public class DatabaseController implements DatastoreController {
         try {
             return databaseTester.getConnection();
         } catch (Exception e) {
-            throw new RuntimeException("Failed to get connection. datastoreName="
-                    + datastoreName, e);
+            throw new RuntimeException("Failed to get connection. datastoreName=" + datastoreName, e);
         }
     }
 
@@ -124,11 +116,9 @@ public class DatabaseController implements DatastoreController {
         try {
             return new XlsDataSet(new File(dataFilePath));
         } catch (DataSetException e) {
-            throw new RuntimeException("Failed to read datastore. datastoreName="
-                    + datastoreName, e);
+            throw new RuntimeException("Failed to read datastore. datastoreName=" + datastoreName, e);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to read datastore file."
-                    + datastoreName, e);
+            throw new RuntimeException("Failed to read datastore file." + datastoreName, e);
         }
     }
 
@@ -139,11 +129,9 @@ public class DatabaseController implements DatastoreController {
 
         IDataSet actualDataSet = null;
         try {
-            actualDataSet = connection.createDataSet(expectedDataSet
-                    .getTableNames());
+            actualDataSet = connection.createDataSet(expectedDataSet.getTableNames());
         } catch (SQLException e) {
-            throw new RuntimeException("Failed to get actual dataset. datastoreName="
-                    + datastoreName, e);
+            throw new RuntimeException("Failed to get actual dataset. datastoreName=" + datastoreName, e);
         } catch (DataSetException e) {
             throw new RuntimeException("", e);
         }
@@ -151,16 +139,14 @@ public class DatabaseController implements DatastoreController {
         try {
             Assertion.assertEquals(expectedDataSet, actualDataSet);
         } catch (DatabaseUnitException e) {
-            throw new RuntimeException("Failed to assert dataset. datastoreName="
-                    + datastoreName, e);
+            throw new RuntimeException("Failed to assert dataset. datastoreName=" + datastoreName, e);
         }
 
         return actualDataSet;
     }
 
     @Override
-    public void assertAndSaveDatastore(String expectedDataFile,
-            String saveDataFile) {
+    public void assertAndSaveDatastore(String expectedDataFile, String saveDataFile) {
         IDataSet xlsDataSet = createXlsDataSetFrom(expectedDataFile);
         IDataSet actualDataset = null;
         try {
@@ -179,37 +165,32 @@ public class DatabaseController implements DatastoreController {
             FileUtils.forceMkdir(new File(saveDir));
             log.info(String.format("Create dir. dir=", saveDir));
         } catch (IOException e) {
-            throw new RuntimeException("Failed to create a dir for saving actual dataset. dir="
-                    + saveDir, e);
+            throw new RuntimeException("Failed to create a dir for saving actual dataset. dir=" + saveDir, e);
         }
 
         try {
-            saveDataFile = saveDataFile.replace(".xlsx", ".xls"); // DbUnit writes ".xls" file.
-            XlsDataSet.write(actualDataset,
-                    new FileOutputStream(new File(saveDataFile)));
-            log.info(String.format("Save actual dataset. file=%s",
-                    saveDataFile));
+            saveDataFile = saveDataFile.replace(".xlsx", ".xls"); // DbUnit
+                                                                  // writes
+                                                                  // ".xls"
+                                                                  // file.
+            XlsDataSet.write(actualDataset, new FileOutputStream(new File(saveDataFile)));
+            log.info(String.format("Save actual dataset. file=%s", saveDataFile));
         } catch (DataSetException e) {
-            throw new RuntimeException("Failed to write actual dataset for evicence. filePath="
-                    + saveDataFile, e);
+            throw new RuntimeException("Failed to write actual dataset for evicence. filePath=" + saveDataFile, e);
         } catch (IOException e) {
             throw new RuntimeException("", e);
         }
     }
 
     @Override
-    public void assertDatastore(String expectedDataFile,
-            String targetDataName) {
+    public void assertDatastore(String expectedDataFile, String targetDataName) {
         assertDatastore(expectedDataFile, targetDataName, null);
     }
 
     @Override
-    public void assertDatastore(String expectedDataFile, String targetDataName,
-            String[] sortColumns) {
+    public void assertDatastore(String expectedDataFile, String targetDataName, String[] sortColumns) {
 
-        log.info(
-                "***** Start assertion. dataStore={}, inputExcelFile={}, fileName={}",
-                datastoreName, expectedDataFile, targetDataName);
+        log.info("***** Start assertion. dataStore={}, inputExcelFile={}, fileName={}", datastoreName, expectedDataFile, targetDataName);
 
         IDataSet expectedDataSet = expectedDataSetMap.get(expectedDataFile);
         if (expectedDataSet == null) {
@@ -244,4 +225,50 @@ public class DatabaseController implements DatastoreController {
         }
     }
 
+    @Override
+    public void backupDatastore(String targetDataFile, String backupDataFile) {
+     // create dir if dir does not exist.
+        String backupDir = FilenameUtils.getFullPath(backupDataFile);
+        try {
+            FileUtils.forceMkdir(new File(backupDir));
+            log.info(String.format("Create backup dir. dir=", backupDir));
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to create a dir for saving actual dataset. dir="
+                    + backupDir, e);
+        }
+        
+        IDataSet targetDataSet = expectedDataSetMap.get(targetDataFile);
+        if (targetDataSet == null) {
+            targetDataSet = createXlsDataSetFrom(targetDataFile);
+            expectedDataSetMap.put(targetDataFile, targetDataSet);
+        }
+
+        if (connection == null) {
+            connection = setupConnection();
+        }
+
+        IDataSet actualDataSet = null;
+        try {
+            actualDataSet = connection.createDataSet(targetDataSet.getTableNames());
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to get actual dataset. datastoreName=" + datastoreName, e);
+        } catch (DataSetException e) {
+            throw new RuntimeException("", e);
+        }
+        
+        try {
+         // DbUnit writes ".xls" file
+            backupDataFile = backupDataFile.replace(".xlsx", ".xls");
+            XlsDataSet.write(actualDataSet,
+                    new FileOutputStream(new File(backupDataFile)));
+            log.info(String.format("Save actual dataset. file=%s",
+                    backupDataFile));
+        } catch (DataSetException e) {
+            throw new RuntimeException("Failed to write actual dataset for evicence. filePath="
+                    + backupDataFile, e);
+        } catch (IOException e) {
+            throw new RuntimeException("", e);
+        }
+        
+    }
 }

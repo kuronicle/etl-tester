@@ -8,13 +8,16 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
@@ -489,6 +492,46 @@ public class LocalFileFromExcelController implements DatastoreController {
         log.info("Convert file name. from={}, to={}", targetFileName, fileName);
 
         return FilenameUtils.concat(targetFileDir, fileName);
+    }
+
+    @Override
+    public void backupDatastore(String targetDataFile, String backupDataDirectory) {
+       
+        // create directory for backup
+        try {
+            FileUtils.forceMkdir(new File(backupDataDirectory));
+            log.info(String.format("Create backup dir. dir=", backupDataDirectory));
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to create a dir for saving actual dataset. dir="
+                    + backupDataDirectory, e);
+        }
+        
+        // get target DataSet
+        IDataSet targetDataSet = expectedDataSetMap.get(targetDataFile);
+        if (targetDataSet == null) {
+            targetDataSet = createXlsDataSetFrom(targetDataFile);
+            expectedDataSetMap.put(targetDataFile, targetDataSet);
+        }
+        
+        String[] targetFileNames = null;
+        try {
+            targetFileNames = targetDataSet.getTableNames();
+        } catch (DataSetException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
+        for(String targetFileName : targetFileNames) {
+            Path srcFilePath = new File(getActualFilePath(dirPath, targetFileName)).toPath();
+            Path destFilePath = new File(FilenameUtils.concat(backupDataDirectory, targetFileName)).toPath();
+            log.info("Backup file. source={}, dest={}", srcFilePath, destFilePath);
+            try {
+                Files.copy(srcFilePath, destFilePath, StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
     }
 
 }

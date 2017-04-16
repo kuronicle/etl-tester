@@ -53,4 +53,12 @@ public class ExcelEtlTester implements EtlTester {
 
         datastoreController.assertDatastore(expectedDataFile, targetDataName, sortColumns);
     }
+
+    @Override
+    public void backupDatastore(String datastoreName, String targetDataFile, String backupDataFile) {
+        DatastoreController datastoreController = datastoreControllerManager
+                .getDatastoreController(datastoreName);
+        
+        datastoreController.backupDatastore(targetDataFile, backupDataFile);
+    }
 }

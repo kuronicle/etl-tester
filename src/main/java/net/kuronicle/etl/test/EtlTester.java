@@ -13,4 +13,6 @@ public interface EtlTester {
             String targetDataName, String[] sortColumns);
 
     void assertAndSaveDatastore(String datastoreName, String expectedDataFile, String saveDataFile);
+
+    void backupDatastore(String datastoreName, String targetDataFile, String backupDataFile);
 }
